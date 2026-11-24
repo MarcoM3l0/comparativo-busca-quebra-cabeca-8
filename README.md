@@ -52,7 +52,7 @@ A modelagem foi definida em orientação a objetos para separar a representaçã
 | `Resultado` | Armazenamento do caminho encontrado, contadores de nós e tempo gasto. |
 | `Interface` | Gerenciamento da interação no terminal de forma desacoplada da lógica de busca. |
 
-O diagrama de classes (UML) ficará disponível no diretório [`docs/`]().
+O diagrama de classes (UML) está disponível no diretório [`docs/`](https://github.com/MarcoM3l0/comparativo-busca-quebra-cabeca-8/blob/main/docs/diagrama_classes.png).
 
 ---
 
