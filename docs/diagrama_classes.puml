@@ -1,0 +1,150 @@
+@startuml diagrama_classes
+title Diagrama de Classes: Comparativo de Busca no Quebra-Cabeça de 8 Peças
+
+skinparam backgroundColor white
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam class {
+  BackgroundColor #FDFDFD
+  BorderColor #333333
+  ArrowColor #333333
+}
+hide empty members
+left to right direction
+
+' MODELO DO PROBLEMA
+package "Modelo do problema" {
+
+  class Estado {
+    - tabuleiro : tuple[int]
+    + {static} OBJETIVO : tuple[int]
+    --
+    + Estado(tabuleiro : tuple[int])
+    + {static} aleatorio() : Estado
+    + posicao_vazia() : int
+    + sucessores() : list[tuple[str, Estado]]
+    + eh_objetivo() : bool
+    + eh_solucionavel() : bool
+    + __eq__(outro : Estado) : bool
+    + __hash__() : int
+    + __str__() : str
+  }
+
+  class No {
+    + estado : Estado
+    + pai : No
+    + acao : str
+    + custo_g : int
+    --
+    + No(estado, pai, acao, custo_g)
+    + caminho_de_acoes() : list[str]
+    + caminho_de_estados() : list[Estado]
+  }
+}
+
+' HEURÍSTICAS
+package "Heurísticas" {
+
+  abstract class Heuristica {
+    + {abstract} calcular(estado : Estado) : int
+    + nome() : str
+  }
+
+  class PecasForaDoLugar {
+    + calcular(estado : Estado) : int
+  }
+
+  class DistanciaManhattan {
+    + calcular(estado : Estado) : int
+  }
+}
+
+' ALGORITMOS DE BUSCA
+package "Algoritmos de busca" {
+
+  abstract class AlgoritmoBusca {
+    # nos_expandidos : int
+    # nos_gerados : int
+    --
+    + resolver(inicial : Estado) : Resultado
+    # {abstract} _buscar(inicial : Estado) : No
+    # _reiniciar_contadores() : void
+    + {abstract} nome() : str
+  }
+
+  class BuscaLargura {
+    # _buscar(inicial : Estado) : No
+    + nome() : str
+  }
+
+  class AEstrela {
+    - heuristica : Heuristica
+    --
+    + AEstrela(heuristica : Heuristica)
+    # _buscar(inicial : Estado) : No
+    + nome() : str
+  }
+}
+
+' RESULTADO
+class Resultado {
+  + algoritmo : str
+  + encontrou_solucao : bool
+  + acoes : list[str]
+  + nos_expandidos : int
+  + nos_gerados : int
+  + tempo_segundos : float
+  --
+  + tamanho_caminho() : int
+  + resumo() : str
+}
+
+' INTERFACE
+class InterfaceTerminal {
+  - algoritmos : list[AlgoritmoBusca]
+  --
+  + executar() : void
+  + ler_estado() : Estado
+  + escolher_algoritmo() : AlgoritmoBusca
+  + exibir_solucao(inicial : Estado, r : Resultado) : void
+  + exibir_comparativo(resultados : list[Resultado]) : void
+}
+
+
+
+' RELACIONAMENTOS
+
+' Herança
+Heuristica <|-- PecasForaDoLugar
+Heuristica <|-- DistanciaManhattan
+AlgoritmoBusca <|-- BuscaLargura
+AlgoritmoBusca <|-- AEstrela
+
+' Composição / agregação / associação
+No "1" *-- "1" Estado : representa
+No "0..1" o-- "0..1" No : pai
+AEstrela "1" o-- "1" Heuristica : usa
+InterfaceTerminal "1" o-- "1..*" AlgoritmoBusca : disponibiliza
+
+' Dependências
+AlgoritmoBusca ..> No : cria e expande
+AlgoritmoBusca ..> Resultado : produz
+Heuristica ..> Estado : avalia
+InterfaceTerminal ..> Estado : lê e exibe
+InterfaceTerminal ..> Resultado : exibe
+
+note bottom of AlgoritmoBusca
+  **Template Method:** resolver() valida a
+  solvabilidade, zera os contadores, mede o
+  tempo e chama _buscar(), que cada
+  subclasse implementa. Retorna um Resultado.
+end note
+
+note bottom of Heuristica
+  Admissível: nunca superestima o custo real
+  até o objetivo, o que garante que o A*
+  encontre a solução ótima.
+end note
+
+@enduml
